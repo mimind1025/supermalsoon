@@ -8,9 +8,6 @@
 </head>
 <body>
 
-  <!-- 관리자 모드 표시 배지 (관리자 모드일 때만 보임) -->
-  <div id="adminModeBadge" class="admin-mode-badge" hidden>🛠 관리자 모드 (테스트)</div>
-
   <!-- 상단 브랜드 헤더 -->
   <header class="site-header">
     <div class="site-header-inner">
@@ -50,35 +47,10 @@
           <div class="hero-image">
             <span class="placeholder-text">🐣<br />말순이 대표 이미지<br />(준비중)</span>
             <!-- 실제 이미지 준비되면 images/malsoon-main.png 로 자동 표시됩니다 -->
-            <!-- 관리자 모드에서 이미지를 바꾸면 이 img의 src가 JS로 교체됩니다 -->
+            <!-- Supabase 연결 후에는 admin.html에서 등록한 이미지로 JS가 src를 교체합니다 -->
             <img src="images/malsoon-main.png" alt="슈퍼말순 대표 이미지" onerror="this.style.display='none'" />
           </div>
-          <button type="button" id="changeHeroImageBtn" class="btn btn-secondary hero-image-edit-btn" hidden>
-            메인 이미지 변경
-          </button>
-          <input type="file" id="heroImageInput" accept="image/*" hidden />
         </div>
-      </div>
-
-      <!-- 관리자 전용 HERO 편집 패널 (관리자 모드일 때만 보임) -->
-      <div id="heroAdminPanel" class="admin-panel" hidden>
-        <p class="admin-panel-title">🛠 관리자 편집 — 메인 HERO</p>
-
-        <div class="admin-field">
-          <label for="heroTitleInput">제목</label>
-          <textarea id="heroTitleInput" rows="2"></textarea>
-        </div>
-
-        <div class="admin-field">
-          <label for="heroDescInput">설명</label>
-          <textarea id="heroDescInput" rows="2"></textarea>
-        </div>
-
-        <div class="admin-panel-buttons">
-          <button type="button" id="heroCancelBtn" class="btn btn-secondary">취소</button>
-          <button type="button" id="heroSaveBtn" class="btn btn-primary">저장</button>
-        </div>
-        <p class="admin-panel-note">※ 지금은 이 브라우저에만 임시 저장돼여 (localStorage)</p>
       </div>
     </section>
 
@@ -207,32 +179,9 @@
     <p>ⓒ 슈퍼말순TV</p>
   </footer>
 
-  <!-- 관리자 진입 버튼 (일반 방문자에게 방해되지 않도록 아주 작게) -->
-  <button type="button" id="adminGearBtn" class="admin-gear-btn" aria-label="관리자 모드">⚙</button>
-
-  <!-- 관리자 비밀번호 입력 팝업 -->
-  <!-- 테스트용 관리자 기능이며 실제 공개 전 서버 인증 방식으로 교체 필요 -->
-  <div id="adminLoginModal" class="modal-overlay">
-    <div class="modal-box admin-login-box">
-      <p class="modal-title">관리자 모드</p>
-      <p class="modal-text">테스트용 관리자 비밀번호를 입력해주세여</p>
-      <input
-        type="password"
-        id="adminPasswordInput"
-        class="admin-password-input"
-        placeholder="비밀번호"
-        autocomplete="off"
-      />
-      <p id="adminLoginError" class="admin-login-error" hidden>비밀번호가 틀렸어여</p>
-      <div class="modal-buttons">
-        <button type="button" id="adminLoginCancelBtn" class="btn btn-secondary">취소</button>
-        <button type="button" id="adminLoginConfirmBtn" class="btn btn-primary">확인</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Supabase 클라이언트 (방명록 저장용) -->
+  <!-- Supabase 클라이언트 (방명록 / 콘텐츠 / HERO 설정 조회용) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

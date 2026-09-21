@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>슈퍼말순 관리자</title>
+<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+
+  <header class="admin-header">
+    <span class="admin-header-title">🐣 슈퍼말순 관리자</span>
+    <button type="button" id="logoutBtn" class="btn btn-secondary admin-logout-btn" hidden>로그아웃</button>
+  </header>
+
+  <main class="admin-main">
+
+    <!-- Supabase 연결 전 안내 -->
+    <div id="notConfiguredNotice" class="admin-notice" hidden>
+      <p><strong>Supabase가 아직 연결되지 않았어요.</strong></p>
+      <p>supabase-config.js 파일에 Supabase 프로젝트 URL과 anon key를 채워 넣으면
+      이 관리자 페이지를 바로 사용할 수 있어요.</p>
+    </div>
+
+    <!-- 로그인 화면 -->
+    <section id="loginSection" class="admin-card" hidden>
+      <h2 class="admin-card-title">관리자 로그인</h2>
+      <p class="admin-card-sub">Supabase에 등록된 관리자 계정으로 로그인하세요.</p>
+      <form id="loginForm" class="admin-form">
+        <div class="admin-field">
+          <label for="loginEmail">이메일</label>
+          <input type="email" id="loginEmail" autocomplete="username" required />
+        </div>
+        <div class="admin-field">
+          <label for="loginPassword">비밀번호</label>
+          <input type="password" id="loginPassword" autocomplete="current-password" required />
+        </div>
+        <p id="loginError" class="admin-error" hidden></p>
+        <button type="submit" id="loginSubmitBtn" class="btn btn-primary admin-full-btn">로그인</button>
+      </form>
+    </section>
+
+    <!-- 콘텐츠 등록 (로그인 후에만 표시) -->
+    <section id="dashboard" class="admin-card" hidden>
+      <h2 class="admin-card-title">새 콘텐츠 등록</h2>
+      <p class="admin-card-sub">파일을 선택하고 등록을 누르면 자동으로 업로드·저장돼요.</p>
+
+      <form id="contentForm" class="admin-form">
+        <div class="admin-field">
+          <label for="contentTitleInput">제목</label>
+          <input type="text" id="contentTitleInput" required />
+        </div>
+
+        <div class="admin-field">
+          <label for="contentDescInput">설명</label>
+          <textarea id="contentDescInput" rows="2" required></textarea>
+        </div>
+
+        <div class="admin-field">
+          <label for="contentTypeInput">콘텐츠 유형</label>
+          <select id="contentTypeInput">
+            <option value="GIF">GIF</option>
+            <option value="VIDEO">VIDEO</option>
+            <option value="IMAGE">IMAGE</option>
+            <option value="ZIP">ZIP</option>
+          </select>
+        </div>
+
+        <div class="admin-field">
+          <label class="admin-file-label">
+            대표 썸네일 파일 선택
+            <input type="file" id="thumbnailInput" accept="image/*" />
+          </label>
+        </div>
+
+        <div class="admin-field">
+          <label class="admin-file-label">
+            미리보기 파일 선택 (GIF/이미지/영상)
+            <input type="file" id="previewInput" accept="image/*,video/*" />
+          </label>
+        </div>
+
+        <div class="admin-field">
+          <label class="admin-file-label">
+            다운로드 파일 선택 (ZIP 등)
+            <input type="file" id="downloadInput" />
+          </label>
+        </div>
+
+        <div class="admin-field">
+          <label for="sortOrderInput">정렬 순서</label>
+          <input type="number" id="sortOrderInput" value="0" step="1" />
+        </div>
+
+        <button type="submit" id="submitBtn" class="btn btn-primary admin-full-btn">등록</button>
+        <p id="statusMsg" class="admin-status"></p>
+      </form>
+    </section>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,159 @@
+/* ===== 관리자 페이지 전용 스타일 ===== */
+/* 색상/버튼(.btn, .btn-primary 등)은 style.css를 그대로 재사용합니다. */
+
+body {
+  background-color: #fff8f2;
+}
+
+.admin-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: rgba(255, 248, 242, 0.95);
+  border-bottom: 1px solid #f5e4de;
+}
+
+.admin-header-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #ff6f91;
+}
+
+.admin-logout-btn {
+  padding: 8px 14px;
+  font-size: 13px;
+}
+
+.admin-main {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px 16px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.admin-notice {
+  background: #fff2ea;
+  border: 1px solid #ffd9c7;
+  border-radius: 14px;
+  padding: 16px;
+  font-size: 13.5px;
+  color: #7a6c62;
+  line-height: 1.7;
+}
+
+.admin-notice strong {
+  color: #d97a4b;
+}
+
+.admin-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+}
+
+.admin-card-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: #4a3f3f;
+  margin: 0 0 4px;
+}
+
+.admin-card-sub {
+  font-size: 12.5px;
+  color: #9c8d82;
+  margin: 0 0 16px;
+}
+
+.admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-field label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #7a6c62;
+}
+
+.admin-field input[type="text"],
+.admin-field input[type="email"],
+.admin-field input[type="password"],
+.admin-field textarea,
+.admin-field select {
+  border: 1px solid #f5e4de;
+  background: #fffdfa;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #4a3f3f;
+  resize: none;
+}
+
+.admin-field input:focus,
+.admin-field textarea:focus,
+.admin-field select:focus {
+  outline: none;
+  border-color: #ff8fa3;
+}
+
+.admin-file-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #7a6c62;
+}
+
+.admin-file-label input[type="file"] {
+  font-size: 12.5px;
+  padding: 10px;
+  border: 1px dashed #ffd0da;
+  border-radius: 12px;
+  background: #fff8fa;
+  color: #7a6c62;
+}
+
+.admin-full-btn {
+  width: 100%;
+  padding: 14px;
+  font-size: 14.5px;
+}
+
+.admin-status {
+  min-height: 16px;
+  font-size: 12.5px;
+  color: #ff6f91;
+  margin: 0;
+  text-align: center;
+}
+
+.admin-error {
+  font-size: 12.5px;
+  color: #ff6f91;
+  margin: 0;
+  text-align: center;
+}
+
+/* ===== PC 화면 ===== */
+@media (min-width: 640px) {
+  .admin-main {
+    max-width: 640px;
+    padding: 24px 20px 80px;
+  }
+}
