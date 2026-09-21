@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>슈퍼말순TV 공식 홈페이지</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- 관리자 모드 표시 배지 (관리자 모드일 때만 보임) -->
+  <div id="adminModeBadge" class="admin-mode-badge" hidden>🛠 관리자 모드 (테스트)</div>
+
+  <!-- 상단 브랜드 헤더 -->
+  <header class="site-header">
+    <div class="site-header-inner">
+      <a href="#home" class="brand" data-scroll>슈퍼말순<span>TV</span></a>
+
+      <nav class="main-nav" aria-label="주요 메뉴">
+        <a href="#home" data-scroll>홈</a>
+        <a href="#contentSection" data-scroll data-filter="all">이모티콘</a>
+        <a href="#contentSection" data-scroll data-filter="gif">움짤</a>
+        <a href="#contentSection" data-scroll data-filter="video">영상</a>
+        <a href="#guestbookSection" data-scroll>방명록</a>
+      </nav>
+
+      <button type="button" class="btn-kakao" disabled>
+        <span class="kakao-icon" aria-hidden="true">💬</span>
+        <span class="kakao-text">카카오로 시작하기</span>
+        <span class="badge-soon">준비중</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section id="home" class="hero">
+      <div class="hero-inner">
+        <div class="hero-text">
+          <p class="hero-badge">슈퍼말순 공식 홈페이지</p>
+          <h1 class="hero-title">말순이네<br />놀러오셨네여</h1>
+          <p class="hero-sub">언니오빠들 쓰라고 이것저것<br />챙겨놨어여 ♡</p>
+          <button type="button" id="heroCta" class="btn btn-primary hero-cta">
+            무료 이모티콘 보러가기
+          </button>
+        </div>
+
+        <div class="hero-image-wrap">
+          <div class="hero-speech-bubble">놀러왔어영? 🐣</div>
+          <div class="hero-image">
+            <span class="placeholder-text">🐣<br />말순이 대표 이미지<br />(준비중)</span>
+            <!-- 실제 이미지 준비되면 images/malsoon-main.png 로 자동 표시됩니다 -->
+            <!-- 관리자 모드에서 이미지를 바꾸면 이 img의 src가 JS로 교체됩니다 -->
+            <img src="images/malsoon-main.png" alt="슈퍼말순 대표 이미지" onerror="this.style.display='none'" />
+          </div>
+          <button type="button" id="changeHeroImageBtn" class="btn btn-secondary hero-image-edit-btn" hidden>
+            메인 이미지 변경
+          </button>
+          <input type="file" id="heroImageInput" accept="image/*" hidden />
+        </div>
+      </div>
+
+      <!-- 관리자 전용 HERO 편집 패널 (관리자 모드일 때만 보임) -->
+      <div id="heroAdminPanel" class="admin-panel" hidden>
+        <p class="admin-panel-title">🛠 관리자 편집 — 메인 HERO</p>
+
+        <div class="admin-field">
+          <label for="heroTitleInput">제목</label>
+          <textarea id="heroTitleInput" rows="2"></textarea>
+        </div>
+
+        <div class="admin-field">
+          <label for="heroDescInput">설명</label>
+          <textarea id="heroDescInput" rows="2"></textarea>
+        </div>
+
+        <div class="admin-panel-buttons">
+          <button type="button" id="heroCancelBtn" class="btn btn-secondary">취소</button>
+          <button type="button" id="heroSaveBtn" class="btn btn-primary">저장</button>
+        </div>
+        <p class="admin-panel-note">※ 지금은 이 브라우저에만 임시 저장돼여 (localStorage)</p>
+      </div>
+    </section>
+
+    <!-- 카테고리 -->
+    <section class="section category-section">
+      <h2 class="section-title">뭐부터 챙겨갈까요?</h2>
+      <p class="section-sub">말순이가 챙겨온 콘텐츠들이에여</p>
+
+      <div class="category-grid">
+        <button type="button" class="category-card" data-filter="holiday">
+          <div class="category-image">
+            <span class="placeholder-text small">🎉</span>
+            <img src="images/category-holiday.png" alt="명절 이모티콘" onerror="this.remove()" />
+          </div>
+          <h3 class="category-title">명절 이모티콘</h3>
+          <p class="category-desc">명절마다 꺼내쓰는 말순이 인사 모음</p>
+        </button>
+
+        <button type="button" class="category-card" data-filter="gif">
+          <div class="category-image">
+            <span class="placeholder-text small">✨</span>
+            <img src="images/category-gif.png" alt="말순이 일상 움짤" onerror="this.remove()" />
+          </div>
+          <h3 class="category-title">말순이 일상 움짤</h3>
+          <p class="category-desc">카톡에 슬쩍 던지기 좋은 말순이 리액션</p>
+        </button>
+
+        <button type="button" class="category-card" data-filter="video">
+          <div class="category-image">
+            <span class="placeholder-text small">🎬</span>
+            <img src="images/category-video.png" alt="말순이 영상" onerror="this.remove()" />
+          </div>
+          <h3 class="category-title">말순이 영상</h3>
+          <p class="category-desc">고화질로 소장하는 말순이 짧은 영상</p>
+        </button>
+      </div>
+    </section>
+
+    <!-- 콘텐츠 카드 -->
+    <section id="contentSection" class="section emoji-section">
+      <div class="section-title-row">
+        <div class="section-title-deco">
+          <img src="images/malsoon-icon.png" alt="" onerror="this.parentElement.style.display='none'" />
+        </div>
+        <div>
+          <h2 class="section-title">말순이 무료 콘텐츠</h2>
+          <p class="section-sub">언니오빠들 쓰라고 말순이가 챙겨왔어여 ♡</p>
+        </div>
+      </div>
+
+      <div class="filter-tabs" id="filterTabs">
+        <button type="button" class="filter-tab active" data-filter="all">전체</button>
+        <button type="button" class="filter-tab" data-filter="holiday">명절 이모티콘</button>
+        <button type="button" class="filter-tab" data-filter="gif">움짤</button>
+        <button type="button" class="filter-tab" data-filter="video">영상</button>
+      </div>
+
+      <!-- 콘텐츠 카드는 script.js의 contents 배열을 읽어 자동으로 채워집니다 -->
+      <div id="contentList" class="emoji-set-list"></div>
+    </section>
+
+    <!-- 다운로드 전 구독 팝업 -->
+    <div id="subscribeModal" class="modal-overlay">
+      <div class="modal-box">
+        <p class="modal-title">잠깐만여 ✋</p>
+        <p class="modal-text">말순이가 공짜로 챙겨드리는 거니까</p>
+        <p class="modal-text">슈퍼말순TV 구독 한번만 부탁드려여 ♡</p>
+        <div class="modal-buttons">
+          <button id="goSubscribeBtn" class="btn btn-secondary">유튜브 구독하러 가기</button>
+          <button id="goKakaoChannelBtn" class="btn btn-secondary">말순이 카카오채널 친구추가</button>
+          <button id="confirmDownloadBtn" class="btn btn-primary">이미 했어여 → 다운로드</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 콘텐츠 미리보기 팝업 (이미지 / 추후 GIF·MP4 대응) -->
+    <div id="previewModal" class="modal-overlay">
+      <div class="modal-box preview-box">
+        <button id="closePreviewBtn" class="preview-close" aria-label="닫기">×</button>
+        <div id="previewMedia" class="preview-media"></div>
+        <p id="previewTitle" class="preview-title"></p>
+      </div>
+    </div>
+
+    <!-- 방명록 -->
+    <section id="guestbookSection" class="section guestbook-section">
+      <div class="guestbook-header">
+        <div>
+          <h2 class="section-title">말순이네 방명록</h2>
+          <p class="section-sub">왔다갔으면 한마디 정도는 남겨주고 가세여 😐</p>
+        </div>
+        <div class="guestbook-character">
+          <img src="images/malsoon-guestbook.png" alt="" onerror="this.parentElement.style.display='none'" />
+        </div>
+      </div>
+
+      <div id="guestbookNotice" class="guestbook-notice" hidden></div>
+
+      <form id="guestbookForm" class="guestbook-form">
+        <input
+          type="text"
+          id="nickname"
+          placeholder="닉네임"
+          maxlength="20"
+          autocomplete="off"
+          required
+        />
+        <textarea
+          id="message"
+          placeholder="한마디 남겨주세여"
+          maxlength="150"
+          rows="3"
+          required
+        ></textarea>
+        <button type="submit" id="submitBtn" class="btn btn-primary">남기기</button>
+      </form>
+
+      <ul id="guestbookList" class="guestbook-list"></ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-character">
+      <img src="images/malsoon-footer.png" alt="" onerror="this.parentElement.style.display='none'" />
+    </div>
+    <p>ⓒ 슈퍼말순TV</p>
+  </footer>
+
+  <!-- 관리자 진입 버튼 (일반 방문자에게 방해되지 않도록 아주 작게) -->
+  <button type="button" id="adminGearBtn" class="admin-gear-btn" aria-label="관리자 모드">⚙</button>
+
+  <!-- 관리자 비밀번호 입력 팝업 -->
+  <!-- 테스트용 관리자 기능이며 실제 공개 전 서버 인증 방식으로 교체 필요 -->
+  <div id="adminLoginModal" class="modal-overlay">
+    <div class="modal-box admin-login-box">
+      <p class="modal-title">관리자 모드</p>
+      <p class="modal-text">테스트용 관리자 비밀번호를 입력해주세여</p>
+      <input
+        type="password"
+        id="adminPasswordInput"
+        class="admin-password-input"
+        placeholder="비밀번호"
+        autocomplete="off"
+      />
+      <p id="adminLoginError" class="admin-login-error" hidden>비밀번호가 틀렸어여</p>
+      <div class="modal-buttons">
+        <button type="button" id="adminLoginCancelBtn" class="btn btn-secondary">취소</button>
+        <button type="button" id="adminLoginConfirmBtn" class="btn btn-primary">확인</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase 클라이언트 (방명록 저장용) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="script.js"></script>
+</body>
+</html>
