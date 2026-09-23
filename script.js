@@ -42,14 +42,14 @@ const DEFAULT_CONTENTS = [
     description: "카톡·DM·댓글에 쓰기 좋은 말순이 일상 리액션 모음이에여 ♡",
     type: "GIF",
     thumbnailUrl: "images/emoji-set-01.png",
-    previewUrl: "",
-    downloadUrl: "downloads/malsoon-emoji-vol1.zip",
+    fileUrls: [],
   },
 ];
 
 let contents = [...DEFAULT_CONTENTS];
 
 // Supabase의 snake_case 행을 화면 렌더링에서 쓰는 camelCase 형태로 변환합니다.
+// file_urls는 세트에 포함된 GIF/MP4 파일들의 URL 배열입니다.
 function mapDbContentToItem(row) {
   return {
     id: row.id,
@@ -57,8 +57,7 @@ function mapDbContentToItem(row) {
     description: row.description,
     type: row.type,
     thumbnailUrl: row.thumbnail_url || "",
-    previewUrl: row.preview_url || "",
-    downloadUrl: row.download_url || "",
+    fileUrls: Array.isArray(row.file_urls) ? row.file_urls : [],
   };
 }
 
@@ -111,21 +110,21 @@ function renderContentCard(item) {
       <button type="button" class="btn btn-primary download-set-btn">무료 다운로드</button>
     </div>
   `;
+  const fileCount = item.fileUrls.length;
   body.querySelector(".emoji-set-category").textContent = TYPE_LABELS[item.type] || item.type;
   body.querySelector(".emoji-set-title").textContent = item.title;
   body.querySelector(".emoji-set-desc").textContent = item.description;
-  body.querySelector(".emoji-set-info").textContent = item.downloadUrl
-    ? "무료 다운로드"
-    : "다운로드 준비중";
+  body.querySelector(".emoji-set-info").textContent =
+    fileCount > 0 ? `${fileCount}개 · 무료 다운로드` : "다운로드 준비중";
 
   body.querySelector(".preview-btn").addEventListener("click", () => {
     openPreview(item);
   });
 
   const downloadBtn = body.querySelector(".download-set-btn");
-  if (item.downloadUrl) {
+  if (fileCount > 0) {
     downloadBtn.addEventListener("click", () => {
-      openModal(item.downloadUrl);
+      openModal(item);
     });
   } else {
     downloadBtn.disabled = true;
@@ -192,15 +191,13 @@ const previewMedia = document.getElementById("previewMedia");
 const previewTitle = document.getElementById("previewTitle");
 const closePreviewBtn = document.getElementById("closePreviewBtn");
 
-// type이 VIDEO면 자동재생 반복 영상으로, 그 외(GIF/IMAGE/ZIP)에는
-// preview_url(없으면 썸네일)을 이미지로 보여줍니다.
-function buildPreviewElement(item) {
-  const src = item.previewUrl || item.thumbnailUrl;
-  if (!src) return null;
+// 파일 확장자로 GIF/이미지는 img, MP4(영상)는 자동재생 반복 video로 보여줍니다.
+function buildPreviewMediaElement(url) {
+  const ext = url.split(".").pop().split("?")[0].toLowerCase();
 
-  if (item.type === "VIDEO") {
+  if (ext === "mp4" || ext === "mov" || ext === "webm") {
     const video = document.createElement("video");
-    video.src = src;
+    video.src = url;
     video.controls = true;
     video.autoplay = true;
     video.muted = true;
@@ -210,25 +207,28 @@ function buildPreviewElement(item) {
   }
 
   const img = document.createElement("img");
-  img.src = src;
+  img.src = url;
   return img;
 }
 
+// 세트 안의 파일을 모두 보여줍니다. (없으면 썸네일 1장이라도 보여줌)
 function openPreview(item) {
   previewMedia.innerHTML = "";
   previewTitle.textContent = item.title;
 
-  const el = buildPreviewElement(item);
-  if (!el) {
+  const urls = item.fileUrls.length > 0 ? item.fileUrls : item.thumbnailUrl ? [item.thumbnailUrl] : [];
+
+  if (urls.length === 0) {
     previewMedia.innerHTML = `<span class="placeholder-text small">🖼️</span>`;
     previewModal.classList.add("active");
     return;
   }
 
-  el.onerror = () => {
-    previewMedia.innerHTML = `<span class="placeholder-text small">🖼️</span>`;
-  };
-  previewMedia.appendChild(el);
+  urls.forEach((url) => {
+    const el = buildPreviewMediaElement(url);
+    el.onerror = () => el.remove();
+    previewMedia.appendChild(el);
+  });
   previewModal.classList.add("active");
 }
 
@@ -248,11 +248,11 @@ const goSubscribeBtn = document.getElementById("goSubscribeBtn");
 const goKakaoChannelBtn = document.getElementById("goKakaoChannelBtn");
 const confirmDownloadBtn = document.getElementById("confirmDownloadBtn");
 
-// 팝업을 연 콘텐츠의 다운로드 파일 경로를 기억해뒀다가 확정 시 사용
-let pendingDownloadFile = "";
+// 팝업을 연 콘텐츠(세트)를 기억해뒀다가 확정 시 다운로드
+let pendingDownloadItem = null;
 
-function openModal(downloadFile) {
-  pendingDownloadFile = downloadFile;
+function openModal(item) {
+  pendingDownloadItem = item;
   subscribeModal.classList.add("active");
 }
 
@@ -260,14 +260,43 @@ function closeModal() {
   subscribeModal.classList.remove("active");
 }
 
-function startDownload(filePath) {
-  if (!filePath) return;
+// 파일이 1개면 그대로, 여러 개면 zip으로 묶어서 한 번에 다운로드합니다.
+// (관리자가 미리 zip을 만들 필요가 없도록 다운로드 시점에 브라우저에서 압축합니다)
+async function startSetDownload(item) {
+  const urls = item.fileUrls || [];
+  if (urls.length === 0) return;
+
+  if (urls.length === 1) {
+    const link = document.createElement("a");
+    link.href = urls[0];
+    link.download = "";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    return;
+  }
+
+  const safeTitle = item.title.replace(/[\\/:*?"<>|]/g, "").trim() || "malsoon";
+  const zip = new JSZip();
+
+  await Promise.all(
+    urls.map(async (url, index) => {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const ext = url.split(".").pop().split("?")[0];
+      zip.file(`${safeTitle}-${index + 1}.${ext}`, blob);
+    })
+  );
+
+  const zipBlob = await zip.generateAsync({ type: "blob" });
+  const blobUrl = URL.createObjectURL(zipBlob);
   const link = document.createElement("a");
-  link.href = filePath;
-  link.download = "";
+  link.href = blobUrl;
+  link.download = `${safeTitle}.zip`;
   document.body.appendChild(link);
   link.click();
   link.remove();
+  URL.revokeObjectURL(blobUrl);
 }
 
 goSubscribeBtn.addEventListener("click", () => {
@@ -278,9 +307,23 @@ goKakaoChannelBtn.addEventListener("click", () => {
   window.open(KAKAO_CHANNEL_URL, "_blank");
 });
 
-confirmDownloadBtn.addEventListener("click", () => {
-  closeModal();
-  startDownload(pendingDownloadFile);
+confirmDownloadBtn.addEventListener("click", async () => {
+  if (!pendingDownloadItem) return;
+
+  const originalText = confirmDownloadBtn.textContent;
+  confirmDownloadBtn.disabled = true;
+  confirmDownloadBtn.textContent = "다운로드 준비 중...";
+
+  try {
+    await startSetDownload(pendingDownloadItem);
+    closeModal();
+  } catch (err) {
+    console.error("다운로드 실패", err);
+    alert("다운로드에 실패했어여. 잠시 후 다시 시도해주세여.");
+  } finally {
+    confirmDownloadBtn.disabled = false;
+    confirmDownloadBtn.textContent = originalText;
+  }
 });
 
 // 팝업 바깥 영역 클릭하면 닫기

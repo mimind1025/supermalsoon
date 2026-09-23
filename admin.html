@@ -69,23 +69,17 @@
 
         <div class="admin-field">
           <label class="admin-file-label">
-            대표 썸네일 파일 선택
+            대표 썸네일 파일 선택 (1개)
             <input type="file" id="thumbnailInput" accept="image/*" />
           </label>
         </div>
 
         <div class="admin-field">
           <label class="admin-file-label">
-            미리보기 파일 선택 (GIF/이미지/영상)
-            <input type="file" id="previewInput" accept="image/*,video/*" />
+            콘텐츠 파일 선택 (GIF/MP4, 여러 개 선택 가능)
+            <input type="file" id="filesInput" accept="image/*,video/mp4" multiple />
           </label>
-        </div>
-
-        <div class="admin-field">
-          <label class="admin-file-label">
-            다운로드 파일 선택 (ZIP 등)
-            <input type="file" id="downloadInput" />
-          </label>
+          <p id="filesSelectedInfo" class="admin-files-info"></p>
         </div>
 
         <div class="admin-field">
@@ -103,5 +97,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
   <script src="admin.js"></script>
+
 </body>
 </html>

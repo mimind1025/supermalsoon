@@ -40,11 +40,18 @@ const contentTitleInput = document.getElementById("contentTitleInput");
 const contentDescInput = document.getElementById("contentDescInput");
 const contentTypeInput = document.getElementById("contentTypeInput");
 const thumbnailInput = document.getElementById("thumbnailInput");
-const previewInput = document.getElementById("previewInput");
-const downloadInput = document.getElementById("downloadInput");
+const filesInput = document.getElementById("filesInput");
+const filesSelectedInfo = document.getElementById("filesSelectedInfo");
 const sortOrderInput = document.getElementById("sortOrderInput");
 const submitBtn = document.getElementById("submitBtn");
 const statusMsg = document.getElementById("statusMsg");
+
+// 선택한 파일 개수/이름을 등록 전에 보여줍니다.
+filesInput.addEventListener("change", () => {
+  const files = Array.from(filesInput.files);
+  filesSelectedInfo.textContent =
+    files.length > 0 ? `선택된 파일 ${files.length}개: ${files.map((f) => f.name).join(", ")}` : "";
+});
 
 /* ---------------- 초기 화면 분기 ---------------- */
 if (!isSupabaseConfigured || !supabaseClient) {
@@ -119,26 +126,30 @@ async function uploadFile(file, folder) {
 }
 
 /* ==========================================================
-   콘텐츠 등록
-   1. 선택한 파일들을 malsoon-files 버킷에 업로드
+   콘텐츠(세트) 등록
+   1. 선택한 파일들(썸네일 1개 + 세트 파일 여러 개)을 malsoon-files 버킷에 업로드
    2. 각 파일의 Public URL 생성
-   3. contents 테이블에 저장
+   3. contents 테이블에 저장 (세트 파일들은 file_urls 배열 컬럼에 저장)
    4. 성공 메시지 표시 + 입력창 초기화
    ========================================================== */
 contentForm.addEventListener("submit", async (e) => {
   e.preventDefault();
+
+  const setFiles = Array.from(filesInput.files);
+  if (setFiles.length === 0) {
+    statusMsg.textContent = "콘텐츠 파일을 1개 이상 선택해주세요.";
+    return;
+  }
+
   submitBtn.disabled = true;
-  statusMsg.textContent = "등록 중이에요...";
+  statusMsg.textContent = `등록 중이에요... (파일 ${setFiles.length}개 업로드 중)`;
 
   try {
     const thumbnailFile = thumbnailInput.files[0];
-    const previewFile = previewInput.files[0];
-    const downloadFile = downloadInput.files[0];
 
-    const [thumbnailUrl, previewUrl, downloadUrl] = await Promise.all([
+    const [thumbnailUrl, fileUrls] = await Promise.all([
       thumbnailFile ? uploadFile(thumbnailFile, "thumbnail") : "",
-      previewFile ? uploadFile(previewFile, "preview") : "",
-      downloadFile ? uploadFile(downloadFile, "download") : "",
+      Promise.all(setFiles.map((file) => uploadFile(file, "files"))),
     ]);
 
     const { error } = await supabaseClient.from("contents").insert([
@@ -147,8 +158,7 @@ contentForm.addEventListener("submit", async (e) => {
         description: contentDescInput.value.trim(),
         type: contentTypeInput.value,
         thumbnail_url: thumbnailUrl,
-        preview_url: previewUrl,
-        download_url: downloadUrl,
+        file_urls: fileUrls,
         sort_order: Number(sortOrderInput.value) || 0,
       },
     ]);
@@ -156,6 +166,7 @@ contentForm.addEventListener("submit", async (e) => {
 
     statusMsg.textContent = "등록했어요! 홈페이지에 바로 반영돼요.";
     contentForm.reset();
+    filesSelectedInfo.textContent = "";
     sortOrderInput.value = "0";
   } catch (err) {
     console.error("콘텐츠 등록 실패", err);
