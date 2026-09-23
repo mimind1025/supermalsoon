@@ -11,7 +11,7 @@
   <!-- 상단 브랜드 헤더 -->
   <header class="site-header">
     <div class="site-header-inner">
-      <a href="#home" class="brand" data-scroll>슈퍼말순<span>TV</span></a>
+      <a href="#home" class="brand" id="brandText" data-scroll>슈퍼말순<span>TV</span></a>
 
       <nav class="main-nav" aria-label="주요 메뉴">
         <a href="#home" data-scroll>홈</a>
@@ -34,7 +34,7 @@
     <section id="home" class="hero">
       <div class="hero-inner">
         <div class="hero-text">
-          <p class="hero-badge">슈퍼말순 공식 홈페이지</p>
+          <p class="hero-badge" id="heroBadge">슈퍼말순 공식 홈페이지</p>
           <h1 class="hero-title">말순이네<br />놀러오셨네여</h1>
           <p class="hero-sub">언니오빠들 쓰라고 이것저것<br />챙겨놨어여 ♡</p>
           <button type="button" id="heroCta" class="btn btn-primary hero-cta">
@@ -56,11 +56,11 @@
 
     <!-- 카테고리 -->
     <section class="section category-section">
-      <h2 class="section-title">뭐부터 챙겨갈까요?</h2>
-      <p class="section-sub">말순이가 챙겨온 콘텐츠들이에여</p>
+      <h2 class="section-title" id="categorySectionTitle">뭐부터 챙겨갈까요?</h2>
+      <p class="section-sub" id="categorySectionSub">말순이가 챙겨온 콘텐츠들이에여</p>
 
       <div class="category-grid">
-        <button type="button" class="category-card" data-filter="holiday">
+        <button type="button" class="category-card" data-filter="holiday" data-category-id="holiday">
           <div class="category-image">
             <span class="placeholder-text small">🎉</span>
             <img src="images/category-holiday.png" alt="명절 이모티콘" onerror="this.remove()" />
@@ -69,7 +69,7 @@
           <p class="category-desc">명절마다 꺼내쓰는 말순이 인사 모음</p>
         </button>
 
-        <button type="button" class="category-card" data-filter="gif">
+        <button type="button" class="category-card" data-filter="gif" data-category-id="gif">
           <div class="category-image">
             <span class="placeholder-text small">✨</span>
             <img src="images/category-gif.png" alt="말순이 일상 움짤" onerror="this.remove()" />
@@ -78,7 +78,7 @@
           <p class="category-desc">카톡에 슬쩍 던지기 좋은 말순이 리액션</p>
         </button>
 
-        <button type="button" class="category-card" data-filter="video">
+        <button type="button" class="category-card" data-filter="video" data-category-id="video">
           <div class="category-image">
             <span class="placeholder-text small">🎬</span>
             <img src="images/category-video.png" alt="말순이 영상" onerror="this.remove()" />
@@ -96,8 +96,8 @@
           <img src="images/malsoon-icon.png" alt="" onerror="this.parentElement.style.display='none'" />
         </div>
         <div>
-          <h2 class="section-title">말순이 무료 콘텐츠</h2>
-          <p class="section-sub">언니오빠들 쓰라고 말순이가 챙겨왔어여 ♡</p>
+          <h2 class="section-title" id="contentSectionTitle">말순이 무료 콘텐츠</h2>
+          <p class="section-sub" id="contentSectionSub">언니오빠들 쓰라고 말순이가 챙겨왔어여 ♡</p>
         </div>
       </div>
 
@@ -139,8 +139,8 @@
     <section id="guestbookSection" class="section guestbook-section">
       <div class="guestbook-header">
         <div>
-          <h2 class="section-title">말순이네 방명록</h2>
-          <p class="section-sub">왔다갔으면 한마디 정도는 남겨주고 가세여 😐</p>
+          <h2 class="section-title" id="guestbookSectionTitle">말순이네 방명록</h2>
+          <p class="section-sub" id="guestbookSectionSub">왔다갔으면 한마디 정도는 남겨주고 가세여 😐</p>
         </div>
         <div class="guestbook-character">
           <img src="images/malsoon-guestbook.png" alt="" onerror="this.parentElement.style.display='none'" />
@@ -176,7 +176,7 @@
     <div class="footer-character">
       <img src="images/malsoon-footer.png" alt="" onerror="this.parentElement.style.display='none'" />
     </div>
-    <p>ⓒ 슈퍼말순TV</p>
+    <p id="footerText">ⓒ 슈퍼말순TV</p>
   </footer>
 
   <!-- Supabase 클라이언트 (방명록 / 콘텐츠 / HERO 설정 조회용) -->

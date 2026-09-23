@@ -58,6 +58,7 @@ function mapDbContentToItem(row) {
     type: row.type,
     thumbnailUrl: row.thumbnail_url || "",
     fileUrls: Array.isArray(row.file_urls) ? row.file_urls : [],
+    downloadCount: row.download_count || 0,
   };
 }
 
@@ -300,12 +301,26 @@ async function startSetDownload(item) {
 }
 
 goSubscribeBtn.addEventListener("click", () => {
-  window.open(YOUTUBE_URL, "_blank");
+  window.open(siteSettings.youtubeUrl, "_blank");
 });
 
 goKakaoChannelBtn.addEventListener("click", () => {
-  window.open(KAKAO_CHANNEL_URL, "_blank");
+  window.open(siteSettings.kakaoChannelUrl, "_blank");
 });
+
+// 다운로드 횟수를 기록합니다. (대시보드 통계용, 실패해도 다운로드 자체는 진행)
+async function logDownload(item) {
+  if (!supabaseClient) return;
+  try {
+    await supabaseClient.from("downloads").insert([{ content_id: item.id }]);
+    await supabaseClient
+      .from("contents")
+      .update({ download_count: (item.downloadCount || 0) + 1 })
+      .eq("id", item.id);
+  } catch (err) {
+    console.error("다운로드 기록 실패", err);
+  }
+}
 
 confirmDownloadBtn.addEventListener("click", async () => {
   if (!pendingDownloadItem) return;
@@ -316,6 +331,7 @@ confirmDownloadBtn.addEventListener("click", async () => {
 
   try {
     await startSetDownload(pendingDownloadItem);
+    logDownload(pendingDownloadItem);
     closeModal();
   } catch (err) {
     console.error("다운로드 실패", err);
@@ -478,19 +494,41 @@ function initGuestbook() {
 initGuestbook();
 
 /* ==========================================================
-   HERO 텍스트/이미지 렌더링
+   홈페이지 기본 설정 (HERO, 섹션 문구, 링크, 브랜드명, 푸터)
    Supabase가 연결되어 있으면 site_settings 테이블(id="main")에서
    불러오고, 아직 연결 전이거나 저장된 값이 없으면 기본값을 보여줍니다.
-   HERO 내용 수정은 admin.html(관리자 페이지)에서 합니다.
+   내용 수정은 admin.html(관리자 페이지 → 홈페이지 기본 설정)에서 합니다.
    ========================================================== */
 const heroTitleEl = document.querySelector(".hero-title");
 const heroSubEl = document.querySelector(".hero-sub");
 const heroImageEl = document.querySelector(".hero-image img");
+const brandTextEl = document.getElementById("brandText");
+const heroBadgeEl = document.getElementById("heroBadge");
+const heroCtaEl = document.getElementById("heroCta");
+const categorySectionTitleEl = document.getElementById("categorySectionTitle");
+const categorySectionSubEl = document.getElementById("categorySectionSub");
+const contentSectionTitleEl = document.getElementById("contentSectionTitle");
+const contentSectionSubEl = document.getElementById("contentSectionSub");
+const guestbookSectionTitleEl = document.getElementById("guestbookSectionTitle");
+const guestbookSectionSubEl = document.getElementById("guestbookSectionSub");
+const footerTextEl = document.getElementById("footerText");
 
 const DEFAULT_SITE_SETTINGS = {
+  brandName: "슈퍼말순TV",
+  heroBadge: "슈퍼말순 공식 홈페이지",
   heroImage: "images/malsoon-main.png",
   heroTitle: "말순이네\n놀러오셨네여",
   heroDesc: "언니오빠들 쓰라고 이것저것\n챙겨놨어여 ♡",
+  heroCtaLabel: "무료 이모티콘 보러가기",
+  categorySectionTitle: "뭐부터 챙겨갈까요?",
+  categorySectionSub: "말순이가 챙겨온 콘텐츠들이에여",
+  contentSectionTitle: "말순이 무료 콘텐츠",
+  contentSectionSub: "언니오빠들 쓰라고 말순이가 챙겨왔어여 ♡",
+  guestbookTitle: "말순이네 방명록",
+  guestbookSub: "왔다갔으면 한마디 정도는 남겨주고 가세여 😐",
+  footerText: "ⓒ 슈퍼말순TV",
+  youtubeUrl: YOUTUBE_URL,
+  kakaoChannelUrl: KAKAO_CHANNEL_URL,
 };
 
 let siteSettings = { ...DEFAULT_SITE_SETTINGS };
@@ -518,9 +556,20 @@ function setHeroImage(src) {
 }
 
 function renderHero() {
+  document.title = siteSettings.brandName;
+  brandTextEl.textContent = siteSettings.brandName;
+  heroBadgeEl.textContent = siteSettings.heroBadge;
   renderMultiline(heroTitleEl, siteSettings.heroTitle);
   renderMultiline(heroSubEl, siteSettings.heroDesc);
   setHeroImage(siteSettings.heroImage);
+  heroCtaEl.textContent = siteSettings.heroCtaLabel;
+  categorySectionTitleEl.textContent = siteSettings.categorySectionTitle;
+  categorySectionSubEl.textContent = siteSettings.categorySectionSub;
+  contentSectionTitleEl.textContent = siteSettings.contentSectionTitle;
+  contentSectionSubEl.textContent = siteSettings.contentSectionSub;
+  guestbookSectionTitleEl.textContent = siteSettings.guestbookTitle;
+  guestbookSectionSubEl.textContent = siteSettings.guestbookSub;
+  footerTextEl.textContent = siteSettings.footerText;
 }
 
 async function loadSiteSettingsFromSupabase() {
@@ -528,20 +577,32 @@ async function loadSiteSettingsFromSupabase() {
 
   const { data, error } = await supabaseClient
     .from("site_settings")
-    .select("hero_image_url, hero_title, hero_desc")
+    .select("*")
     .eq("id", "main")
     .maybeSingle();
 
   if (error) {
-    console.error("HERO 설정을 불러오지 못했습니다.", error);
+    console.error("홈페이지 설정을 불러오지 못했습니다.", error);
     return;
   }
 
   if (data) {
     siteSettings = {
+      brandName: data.brand_name || DEFAULT_SITE_SETTINGS.brandName,
+      heroBadge: data.hero_badge || DEFAULT_SITE_SETTINGS.heroBadge,
       heroImage: data.hero_image_url || DEFAULT_SITE_SETTINGS.heroImage,
       heroTitle: data.hero_title || DEFAULT_SITE_SETTINGS.heroTitle,
       heroDesc: data.hero_desc || DEFAULT_SITE_SETTINGS.heroDesc,
+      heroCtaLabel: data.hero_cta_label || DEFAULT_SITE_SETTINGS.heroCtaLabel,
+      categorySectionTitle: data.category_section_title || DEFAULT_SITE_SETTINGS.categorySectionTitle,
+      categorySectionSub: data.category_section_sub || DEFAULT_SITE_SETTINGS.categorySectionSub,
+      contentSectionTitle: data.content_section_title || DEFAULT_SITE_SETTINGS.contentSectionTitle,
+      contentSectionSub: data.content_section_sub || DEFAULT_SITE_SETTINGS.contentSectionSub,
+      guestbookTitle: data.guestbook_title || DEFAULT_SITE_SETTINGS.guestbookTitle,
+      guestbookSub: data.guestbook_sub || DEFAULT_SITE_SETTINGS.guestbookSub,
+      footerText: data.footer_text || DEFAULT_SITE_SETTINGS.footerText,
+      youtubeUrl: data.youtube_url || DEFAULT_SITE_SETTINGS.youtubeUrl,
+      kakaoChannelUrl: data.kakao_channel_url || DEFAULT_SITE_SETTINGS.kakaoChannelUrl,
     };
     renderHero();
   }
@@ -549,3 +610,55 @@ async function loadSiteSettingsFromSupabase() {
 
 renderHero();
 loadSiteSettingsFromSupabase();
+
+/* ==========================================================
+   카테고리 카드 (명절 이모티콘 / 움짤 / 영상)
+   Supabase categories 테이블에서 불러와 제목/설명/이미지를 채웁니다.
+   ========================================================== */
+async function loadCategoriesFromSupabase() {
+  if (!supabaseClient) return;
+
+  const { data, error } = await supabaseClient.from("categories").select("*");
+
+  if (error) {
+    console.error("카테고리를 불러오지 못했습니다.", error);
+    return;
+  }
+
+  if (!data) return;
+
+  data.forEach((row) => {
+    const card = document.querySelector(`.category-card[data-category-id="${row.id}"]`);
+    if (!card) return;
+
+    if (row.title) card.querySelector(".category-title").textContent = row.title;
+    if (row.description) card.querySelector(".category-desc").textContent = row.description;
+
+    if (row.image_url) {
+      const img = card.querySelector(".category-image img") || document.createElement("img");
+      img.src = row.image_url;
+      img.onerror = () => img.remove();
+      if (!img.isConnected) card.querySelector(".category-image").appendChild(img);
+    }
+  });
+}
+
+loadCategoriesFromSupabase();
+
+/* ==========================================================
+   방문자 수 기록 (대시보드 통계용)
+   같은 브라우저 탭에서 중복 집계되지 않도록 세션당 1회만 기록합니다.
+   ========================================================== */
+const VISIT_LOGGED_KEY = "malsoon_visit_logged";
+
+async function logVisit() {
+  if (!supabaseClient) return;
+  if (sessionStorage.getItem(VISIT_LOGGED_KEY)) return;
+
+  const { error } = await supabaseClient.from("visits").insert([{}]);
+  if (!error) {
+    sessionStorage.setItem(VISIT_LOGGED_KEY, "1");
+  }
+}
+
+logVisit();
